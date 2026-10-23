@@ -1,0 +1,483 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F10000000000000000000001 /* MunicipalBleLabApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000001 /* MunicipalBleLabApp.swift */; };
+		F10000000000000000000002 /* LabConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000002 /* LabConstants.swift */; };
+		F10000000000000000000003 /* UtcTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000003 /* UtcTime.swift */; };
+		F10000000000000000000004 /* IdentifierSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000004 /* IdentifierSchedule.swift */; };
+		F10000000000000000000005 /* Codecs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000005 /* Codecs.swift */; };
+		F10000000000000000000006 /* Classification.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000006 /* Classification.swift */; };
+		F10000000000000000000007 /* Metrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000007 /* Metrics.swift */; };
+		F10000000000000000000008 /* SessionExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000008 /* SessionExport.swift */; };
+		F10000000000000000000009 /* BeaconRanger.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000009 /* BeaconRanger.swift */; };
+		F1000000000000000000000A /* CustomScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000A /* CustomScanner.swift */; };
+		F1000000000000000000000B /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000B /* EventStore.swift */; };
+		F1000000000000000000000C /* LabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000C /* LabController.swift */; };
+		F1000000000000000000000D /* LabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000D /* LabScreen.swift */; };
+		F1000000000000000000000E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000E /* PrivacyInfo.xcprivacy */; };
+		F10000000000000000000010 /* LabCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000010 /* LabCoreTests.swift */; };
+		F100000000000000000000C1 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF00000000000000000000C1 /* CoreLocation.framework */; };
+		F100000000000000000000C2 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF00000000000000000000C2 /* CoreBluetooth.framework */; };
+		F100000000000000000000C3 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF00000000000000000000C3 /* XCTest.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AB0000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000003 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000001;
+			remoteInfo = MunicipalBleLab;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FF0000000000000000000001 /* MunicipalBleLabApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MunicipalBleLabApp.swift; sourceTree = "<group>"; };
+		FF0000000000000000000002 /* LabConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabConstants.swift; sourceTree = "<group>"; };
+		FF0000000000000000000003 /* UtcTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UtcTime.swift; sourceTree = "<group>"; };
+		FF0000000000000000000004 /* IdentifierSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifierSchedule.swift; sourceTree = "<group>"; };
+		FF0000000000000000000005 /* Codecs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Codecs.swift; sourceTree = "<group>"; };
+		FF0000000000000000000006 /* Classification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Classification.swift; sourceTree = "<group>"; };
+		FF0000000000000000000007 /* Metrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metrics.swift; sourceTree = "<group>"; };
+		FF0000000000000000000008 /* SessionExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExport.swift; sourceTree = "<group>"; };
+		FF0000000000000000000009 /* BeaconRanger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeaconRanger.swift; sourceTree = "<group>"; };
+		FF000000000000000000000A /* CustomScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomScanner.swift; sourceTree = "<group>"; };
+		FF000000000000000000000B /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
+		FF000000000000000000000C /* LabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabController.swift; sourceTree = "<group>"; };
+		FF000000000000000000000D /* LabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabScreen.swift; sourceTree = "<group>"; };
+		FF000000000000000000000E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		FF000000000000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FF0000000000000000000010 /* LabCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabCoreTests.swift; sourceTree = "<group>"; };
+		FF00000000000000000000A1 /* MunicipalBleLab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MunicipalBleLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF00000000000000000000A2 /* MunicipalBleLabTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MunicipalBleLabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF00000000000000000000C1 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		FF00000000000000000000C2 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		FF00000000000000000000C3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BB0000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F100000000000000000000C1 /* CoreLocation.framework in Frameworks */,
+				F100000000000000000000C2 /* CoreBluetooth.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F100000000000000000000C3 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EE0000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				EE0000000000000000000002 /* MunicipalBleLab */,
+				EE0000000000000000000007 /* MunicipalBleLabTests */,
+				EE0000000000000000000009 /* Frameworks */,
+				EE0000000000000000000008 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000002 /* MunicipalBleLab */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000001 /* MunicipalBleLabApp.swift */,
+				EE0000000000000000000003 /* Core */,
+				EE0000000000000000000004 /* Ble */,
+				EE0000000000000000000005 /* Session */,
+				EE0000000000000000000006 /* UI */,
+				FF000000000000000000000F /* Info.plist */,
+				FF000000000000000000000E /* PrivacyInfo.xcprivacy */,
+			);
+			path = MunicipalBleLab;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000003 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000002 /* LabConstants.swift */,
+				FF0000000000000000000003 /* UtcTime.swift */,
+				FF0000000000000000000004 /* IdentifierSchedule.swift */,
+				FF0000000000000000000005 /* Codecs.swift */,
+				FF0000000000000000000006 /* Classification.swift */,
+				FF0000000000000000000007 /* Metrics.swift */,
+				FF0000000000000000000008 /* SessionExport.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000004 /* Ble */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000009 /* BeaconRanger.swift */,
+				FF000000000000000000000A /* CustomScanner.swift */,
+			);
+			path = Ble;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000005 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				FF000000000000000000000B /* EventStore.swift */,
+				FF000000000000000000000C /* LabController.swift */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000006 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				FF000000000000000000000D /* LabScreen.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000007 /* MunicipalBleLabTests */ = {
+			isa = PBXGroup;
+			children = (
+				FF0000000000000000000010 /* LabCoreTests.swift */,
+			);
+			path = MunicipalBleLabTests;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000008 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FF00000000000000000000A1 /* MunicipalBleLab.app */,
+				FF00000000000000000000A2 /* MunicipalBleLabTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EE0000000000000000000009 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FF00000000000000000000C1 /* CoreLocation.framework */,
+				FF00000000000000000000C2 /* CoreBluetooth.framework */,
+				FF00000000000000000000C3 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000000000000000000001 /* MunicipalBleLab */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC0000000000000000000002 /* Build configuration list for PBXNativeTarget "MunicipalBleLab" */;
+			buildPhases = (
+				BB0000000000000000000001 /* Sources */,
+				BB0000000000000000000002 /* Frameworks */,
+				BB0000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MunicipalBleLab;
+			productName = MunicipalBleLab;
+			productReference = FF00000000000000000000A1 /* MunicipalBleLab.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA0000000000000000000002 /* MunicipalBleLabTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CC0000000000000000000003 /* Build configuration list for PBXNativeTarget "MunicipalBleLabTests" */;
+			buildPhases = (
+				BB0000000000000000000004 /* Sources */,
+				BB0000000000000000000005 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AB0000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = MunicipalBleLabTests;
+			productName = MunicipalBleLabTests;
+			productReference = FF00000000000000000000A2 /* MunicipalBleLabTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000003 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA0000000000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					AA0000000000000000000002 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = AA0000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = CC0000000000000000000001 /* Build configuration list for PBXProject "MunicipalBleLab" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = es;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				es,
+				Base,
+			);
+			mainGroup = EE0000000000000000000001;
+			productRefGroup = EE0000000000000000000008 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0000000000000000000001 /* MunicipalBleLab */,
+				AA0000000000000000000002 /* MunicipalBleLabTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BB0000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1000000000000000000000E /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BB0000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F10000000000000000000001 /* MunicipalBleLabApp.swift in Sources */,
+				F10000000000000000000002 /* LabConstants.swift in Sources */,
+				F10000000000000000000003 /* UtcTime.swift in Sources */,
+				F10000000000000000000004 /* IdentifierSchedule.swift in Sources */,
+				F10000000000000000000005 /* Codecs.swift in Sources */,
+				F10000000000000000000006 /* Classification.swift in Sources */,
+				F10000000000000000000007 /* Metrics.swift in Sources */,
+				F10000000000000000000008 /* SessionExport.swift in Sources */,
+				F10000000000000000000009 /* BeaconRanger.swift in Sources */,
+				F1000000000000000000000A /* CustomScanner.swift in Sources */,
+				F1000000000000000000000B /* EventStore.swift in Sources */,
+				F1000000000000000000000C /* LabController.swift in Sources */,
+				F1000000000000000000000D /* LabScreen.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB0000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F10000000000000000000010 /* LabCoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AB0000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000001 /* MunicipalBleLab */;
+			targetProxy = AB0000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DD0000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DD0000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DD0000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MunicipalBleLab/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.municipal.blelab;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DD0000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MunicipalBleLab/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.municipal.blelab;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DD0000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.municipal.blelab.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MunicipalBleLab.app/MunicipalBleLab";
+			};
+			name = Debug;
+		};
+		DD0000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.municipal.blelab.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MunicipalBleLab.app/MunicipalBleLab";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CC0000000000000000000001 /* Build configuration list for PBXProject "MunicipalBleLab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD0000000000000000000001 /* Debug */,
+				DD0000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC0000000000000000000002 /* Build configuration list for PBXNativeTarget "MunicipalBleLab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD0000000000000000000003 /* Debug */,
+				DD0000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CC0000000000000000000003 /* Build configuration list for PBXNativeTarget "MunicipalBleLabTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD0000000000000000000005 /* Debug */,
+				DD0000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000003 /* Project object */;
+}
