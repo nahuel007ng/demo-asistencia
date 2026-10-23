@@ -1,11 +1,14 @@
 package dev.municipal.blelab.service
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
@@ -14,6 +17,7 @@ import android.os.HandlerThread
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import dev.municipal.blelab.MainActivity
 import dev.municipal.blelab.R
 import dev.municipal.blelab.session.LabController
@@ -22,18 +26,25 @@ class LabSessionService : Service() {
     private val thread = HandlerThread("ble-lab")
     private lateinit var handler: Handler
     private lateinit var controller: LabController
+    private var statusText = "Laboratorio BLE en espera"
 
     override fun onCreate() {
         super.onCreate()
         thread.start()
         handler = Handler(thread.looper)
         createChannel()
-        startInForeground("Laboratorio BLE en espera")
         controller = LabController(applicationContext, handler, ::startInForeground)
         controller.start()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!connectedDeviceForegroundAllowed(this)) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        startInForeground(statusText)
+        return START_STICKY
+    }
 
     override fun onBind(intent: Intent?): IBinder = LabBinder()
 
@@ -48,13 +59,20 @@ class LabSessionService : Service() {
     }
 
     private fun startInForeground(text: String) {
-        val notification = notification(text)
-        ServiceCompat.startForeground(
-            this,
-            NOTIFICATION_ID,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
-        )
+        statusText = text
+        // API 34+: connectedDevice exige CONNECT, SCAN o ADVERTISE ya concedido.
+        // Sin eso, startForeground cierra el proceso al abrir la pantalla.
+        if (!connectedDeviceForegroundAllowed(this)) return
+        try {
+            ServiceCompat.startForeground(
+                this,
+                NOTIFICATION_ID,
+                notification(text),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
+            )
+        } catch (_: SecurityException) {
+            stopSelf()
+        }
     }
 
     private fun notification(text: String): Notification {
@@ -85,8 +103,19 @@ class LabSessionService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 
-    private companion object {
-        const val CHANNEL_ID = "ble_lab_session"
-        const val NOTIFICATION_ID = 41
+    companion object {
+        private const val CHANNEL_ID = "ble_lab_session"
+        private const val NOTIFICATION_ID = 41
+
+        fun connectedDeviceForegroundAllowed(context: Context): Boolean {
+            if (Build.VERSION.SDK_INT < 34) return true
+            return listOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+            ).any {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
+        }
     }
 }

@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { result ->
         viewModel.onPermissionResult(result)
+        promoteServiceIfAllowed()
     }
 
     private val connection = object : ServiceConnection {
@@ -60,8 +61,14 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         val intent = Intent(this, LabSessionService::class.java)
-        ContextCompat.startForegroundService(this, intent)
+        promoteServiceIfAllowed(intent)
         bindService(intent, connection, Context.BIND_AUTO_CREATE)
+    }
+
+    private fun promoteServiceIfAllowed(intent: Intent = Intent(this, LabSessionService::class.java)) {
+        if (LabSessionService.connectedDeviceForegroundAllowed(this)) {
+            ContextCompat.startForegroundService(this, intent)
+        }
     }
 
     override fun onStop() {
