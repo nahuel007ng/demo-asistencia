@@ -1,0 +1,13 @@
+{
+  "description": "Valor del service data, sin el AD type ni el UUID.",
+  "serviceUuid": "C4A15E20-6B17-4D3E-9F80-11A2B3C4D5E6",
+  "version": 1,
+  "flags": 1,
+  "identifier": 113333333,
+  "periodSeconds": 15,
+  "measuredPower": -59,
+  "hex": "010106C15455000FC5",
+  "adBytesWithoutFlags": 27,
+  "adBytesWithFlags": 30,
+  "unsupportedVersionHex": "020000000001000FC5"
+}

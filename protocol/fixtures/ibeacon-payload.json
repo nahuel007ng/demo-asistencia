@@ -1,0 +1,10 @@
+{
+  "description": "Payload de 23 bytes que se pasa a addManufacturerData(0x004C). No incluye el company id.",
+  "uuid": "7B2E4A10-9C3D-4F58-A1E6-2D8B5C04F917",
+  "major": 1729,
+  "minor": 21589,
+  "measuredPower": -59,
+  "hex": "02157B2E4A109C3D4F58A1E62D8B5C04F91706C15455C5",
+  "adBytesWithoutFlags": 27,
+  "adBytesWithFlags": 30
+}

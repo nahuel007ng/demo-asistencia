@@ -1,0 +1,45 @@
+{
+  "description": "Identificador temporal. Normativo para Android e iOS.",
+  "cases": [
+    {
+      "name": "exact-boundary",
+      "unixEpochSeconds": 1699999995,
+      "periodSeconds": 15,
+      "windowIndex": 113333333,
+      "identifier": 113333333,
+      "major": 1729,
+      "minor": 21589,
+      "secondsRemaining": 15
+    },
+    {
+      "name": "one-second-before",
+      "unixEpochSeconds": 1699999994,
+      "periodSeconds": 15,
+      "windowIndex": 113333332,
+      "identifier": 113333332,
+      "major": 1729,
+      "minor": 21588,
+      "secondsRemaining": 1
+    },
+    {
+      "name": "one-second-after",
+      "unixEpochSeconds": 1699999996,
+      "periodSeconds": 15,
+      "windowIndex": 113333333,
+      "identifier": 113333333,
+      "major": 1729,
+      "minor": 21589,
+      "secondsRemaining": 14
+    },
+    {
+      "name": "five-seconds-into-window",
+      "unixEpochSeconds": 1700000000,
+      "periodSeconds": 15,
+      "windowIndex": 113333333,
+      "identifier": 113333333,
+      "major": 1729,
+      "minor": 21589,
+      "secondsRemaining": 10
+    }
+  ]
+}

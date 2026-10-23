@@ -1,0 +1,12 @@
+{
+  "description": "Clasificación en T = 1699999996, período 15. La ventana actual es 113333333.",
+  "unixEpochSeconds": 1699999996,
+  "periodSeconds": 15,
+  "cases": [
+    {"code": 113333333, "graceSeconds": 0, "classification": "current", "boundaryGrace": false},
+    {"code": 113333332, "graceSeconds": 0, "classification": "previous", "boundaryGrace": false},
+    {"code": 113333332, "graceSeconds": 2, "classification": "previous", "boundaryGrace": true},
+    {"code": 113333334, "graceSeconds": 2, "classification": "next", "boundaryGrace": false},
+    {"code": 1, "graceSeconds": 2, "classification": "other", "boundaryGrace": false}
+  ]
+}
