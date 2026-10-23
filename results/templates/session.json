@@ -23,6 +23,7 @@
     "otherObservations": 0,
     "boundaryGraceObservations": 0,
     "emitterErrors": 0,
+    "receiverErrors": 0,
     "recoveries": 0
   },
   "events": []

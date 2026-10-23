@@ -101,8 +101,9 @@ El anuncio propio no es conectable ni escaneable, salvo el interruptor de la var
 - El identificador se calcula con el reloj de pared UTC del dispositivo que lo calcula.
 - Los intervalos de una misma prueba (latencia de captura, tiempo hasta el código siguiente, demora del callback de advertising) usan el reloj monotónico de ese dispositivo.
 - `wall_time_utc` y `wall_epoch_ms` se exportan para poder inspeccionar el cruce de ventana. Una resta entre la marca de pared del emisor y la del receptor no es una latencia: los relojes no están sincronizados.
-- En Android, la marca primaria de una observación es `ScanResult.timestampNanos` (misma base que `elapsedRealtimeNanos`). También se guarda el instante de entrada al callback.
-- En iOS, la marca primaria es el reloj monotónico tomado al entrar al delegado. `CLBeacon.timestamp` se conserva como dato secundario del sistema.
+- En Android, `monotonic_ms` de una observación es `ScanResult.timestampNanos` pasado a milisegundos, la misma base que `elapsedRealtimeNanos`. Si el callback entra más de 500 ms después, se agrega un `error` con `CALLBACK_DELAY` como máximo una vez cada 5 segundos. No hay una segunda columna para el instante del callback.
+- En iOS, `monotonic_ms` es `clock_gettime_nsec_np(CLOCK_MONOTONIC)` al entrar al delegado. En Apple ese reloj sigue durante el sueño del sistema; las pruebas dejan la pantalla despierta para que el intervalo mida recepción. Si `CLBeacon.timestamp` queda más de 500 ms detrás del reloj de pared del callback, se registra el mismo `CALLBACK_DELAY`, también como máximo una vez cada 5 segundos. El timestamp de Core Location no tiene columna propia.
+- El código Swift usa división que redondea hacia menos infinito. Con épocas positivas coincide con la división de Swift, que trunca hacia cero. Los vectores del laboratorio son posteriores a 1970.
 
 ## Clasificación
 
@@ -139,4 +140,8 @@ capture_latency_ms, success, error_code, error_message
 
 Los tipos de evento usados por las apps son: `session_start`, `session_stop`, `advertise_started`, `advertise_start_failed`, `advertise_data_set`, `advertise_data_failed`, `advertise_stopped`, `rotation_scheduled`, `rotation_applied`, `bluetooth_off`, `bluetooth_on`, `permission_missing`, `permission_revoked`, `recovery`, `scan_started`, `scan_stopped`, `scan_failed`, `observation`, `capture_attempt`, `unsupported_version`, `error`.
 
-Una versión de paquete distinta de 1 produce `unsupported_version` y no una observación con código inventado.
+Una versión de paquete distinta de 1 produce `unsupported_version` y no una observación con código inventado. Cada versión desconocida se anota una sola vez por sesión.
+
+El objeto `summary` del JSON repite el cálculo en memoria. `missedWindows` es null cuando el rango supera 20 000 ventanas; en ese caso `missedWindowsEstimated` es false. Los percentiles de captura salen solo de los intentos exitosos. Los campos son `captureAttempts`, `captureSuccesses`, `captureFailures`, `successPercent`, `captureMeanMs`, `captureP50Ms`, `captureP95Ms`, `captureP99Ms`, `transitionCount`, `transitionMeanMs`, `transitionP50Ms`, `transitionP95Ms`, `missedWindows`, `missedWindowsEstimated`, `currentObservations`, `previousObservations`, `nextObservations`, `otherObservations`, `boundaryGraceObservations`, `emitterErrors`, `receiverErrors` y `recoveries`.
+
+`emitterErrors` y `receiverErrors` cuentan fallos de anuncio, fallos de escaneo, permisos ausentes o revocados, `bluetooth_off` y `error`. `recovery` no es un error. Un arranque rechazado abre su propia sesión corta para que el fallo quede en disco y no se sume al resumen de una sesión ya cerrada.
