@@ -38,16 +38,23 @@ object SessionExport {
     }
 
     fun json(events: List<SessionEvent>, summary: LabSummary): String = buildString {
-        append("{\"schema\":${jsonString(LabConstants.SCHEMA)},")
-        append("\"schemaVersion\":${LabConstants.SCHEMA_VERSION},")
-        append("\"clockNote\":${jsonString(LabConstants.CLOCK_NOTE)},")
-        append("\"summary\":${summary.toJson()},")
-        append("\"events\":[")
-        events.forEachIndexed { index, event ->
-            if (index > 0) append(',')
-            append(event.toJsonLine())
+        writeJson(summary, events.map { it.toJsonLine() }.asSequence(), this)
+    }
+
+    fun writeJson(summary: LabSummary, eventLines: Sequence<String>, output: Appendable) {
+        output.append("{\"schema\":${jsonString(LabConstants.SCHEMA)},")
+        output.append("\"schemaVersion\":${LabConstants.SCHEMA_VERSION},")
+        output.append("\"clockNote\":${jsonString(LabConstants.CLOCK_NOTE)},")
+        output.append("\"summary\":${summary.toJson()},")
+        output.append("\"events\":[")
+        var first = true
+        eventLines.forEach { line ->
+            if (line.isBlank()) return@forEach
+            if (!first) output.append(',')
+            first = false
+            output.append(line)
         }
-        append("]}")
+        output.append("]}")
     }
 }
 
