@@ -1,0 +1,1 @@
+session_id,role,manufacturer,model,os_version,app_version,protocol,advertise_method,period_seconds,interval_ms,connectable,event_type,monotonic_ms,wall_time_utc,wall_epoch_ms,code,major,minor,rssi,classification,boundary_grace,capture_latency_ms,success,error_code,error_message

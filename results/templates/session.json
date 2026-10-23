@@ -1,0 +1,29 @@
+{
+  "schema": "blelab.session",
+  "schemaVersion": 1,
+  "clockNote": "wall_time_utc y wall_epoch_ms de dos dispositivos no están sincronizados. capture_latency_ms y los tiempos entre códigos usan el reloj monotónico del dispositivo que midió.",
+  "summary": {
+    "captureAttempts": 0,
+    "captureSuccesses": 0,
+    "captureFailures": 0,
+    "successPercent": null,
+    "captureMeanMs": null,
+    "captureP50Ms": null,
+    "captureP95Ms": null,
+    "captureP99Ms": null,
+    "transitionCount": 0,
+    "transitionMeanMs": null,
+    "transitionP50Ms": null,
+    "transitionP95Ms": null,
+    "missedWindows": null,
+    "missedWindowsEstimated": false,
+    "currentObservations": 0,
+    "previousObservations": 0,
+    "nextObservations": 0,
+    "otherObservations": 0,
+    "boundaryGraceObservations": 0,
+    "emitterErrors": 0,
+    "recoveries": 0
+  },
+  "events": []
+}

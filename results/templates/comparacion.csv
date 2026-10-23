@@ -1,0 +1,2 @@
+device_model,os,role,protocol,advertise_method,period_s,interval_ms,attempts,successes,success_percent,mean_ms,p50_ms,p95_ms,p99_ms,transition_mean_ms,missed_windows,stale_observations,emitter_errors,emitter_recoveries,hardware_verified,notes
+EJEMPLO_BORRAR,Android 14,receiver,ibeacon,update_set,15,100,20,0,0,,,,,0,0,0,no,"Fila de ejemplo. Reemplazar con una exportación real. hardware_verified=si solo si el dato salió de un dispositivo físico."
