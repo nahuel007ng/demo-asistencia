@@ -1,0 +1,44 @@
+# Android / Gradle
+.gradle/
+**/build/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+output.json
+output-metadata.json
+
+# Keystores and machine-local SDK paths
+*.keystore
+*.jks
+*.pem
+*.p12
+
+# iOS / Xcode / Swift
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.moved-aside
+.swiftpm/
+timeline.xctimeline
+playground.xcworkspace
+
+# Experimental output. Templates under results/templates stay tracked.
+results/exports/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vscode/
