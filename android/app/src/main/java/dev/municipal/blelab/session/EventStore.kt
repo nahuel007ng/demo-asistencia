@@ -6,15 +6,22 @@ import dev.municipal.blelab.core.SessionExport
 import dev.municipal.blelab.core.toCsvRow
 import dev.municipal.blelab.core.toJson
 import dev.municipal.blelab.core.toJsonLine
+import java.io.BufferedWriter
 import java.io.File
 
 class EventStore(val directory: File) {
-    private val csvWriter = File(directory, "events.csv").bufferedWriter()
-    private val jsonWriter = File(directory, "events.jsonl").bufferedWriter()
+    private val csvWriter: BufferedWriter
+    private val jsonWriter: BufferedWriter
     private var closed = false
 
     init {
-        directory.mkdirs()
+        // Los inicializadores de propiedad corren antes que init. Crear la carpeta ahí
+        // abre events.csv con el directorio todavía inexistente y mata el hilo BLE.
+        check(directory.mkdirs() || directory.isDirectory) {
+            "No se pudo crear ${directory.absolutePath}"
+        }
+        csvWriter = File(directory, "events.csv").bufferedWriter()
+        jsonWriter = File(directory, "events.jsonl").bufferedWriter()
         csvWriter.append(SessionExport.csvHeader).append('\n')
         csvWriter.flush()
     }
