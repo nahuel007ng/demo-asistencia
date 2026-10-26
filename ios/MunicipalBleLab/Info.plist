@@ -24,6 +24,8 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>BLE Lab lee el QR del kiosco para armar la fichada de laboratorio. No guarda la imagen.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>BLE Lab escanea anuncios Bluetooth de baja energía para medir la recepción de identificadores rotativos. No se conecta a dispositivos ni transmite datos.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

@@ -1,7 +1,20 @@
+import AVFoundation
 import CoreBluetooth
 import CoreLocation
 import Darwin
 import Foundation
+
+struct CheckInUi: Equatable {
+    var listening = false
+    var phase = "idle"
+    var message = ""
+    var qrText: String?
+    var bleIdentifier: Int64?
+    var step: Int64?
+    var failures = 0
+    var startedMonotonic: Int64 = 0
+    var ownsScan = false
+}
 
 struct ReceiverConfig: Equatable {
     var protocolName: String = "ibeacon"
@@ -54,6 +67,7 @@ struct LabUiState: Equatable {
     var sessionDirectory: String?
     var bluetoothState = "desconocido"
     var locationState = "sin consultar"
+    var checkIn = CheckInUi()
 }
 
 final class LabController: ObservableObject {
@@ -76,6 +90,7 @@ final class LabController: ObservableObject {
     private var lastCallbackDelayLogMs: Int64 = 0
     private var summaryTick = 0
     private var reportedWriteFailure = false
+    private var checkInArmWhenReady = false
 
     init() {
         timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
@@ -117,6 +132,7 @@ final class LabController: ObservableObject {
         state.receiverDesired = false
         state.capturePhase = CapturePhase.idle.rawValue
         startPending = false
+        checkInArmWhenReady = false
         suspendedByBluetooth = false
         resumeAfterBluetooth = false
         stopRadio(log: true)
@@ -169,6 +185,24 @@ final class LabController: ObservableObject {
         }
     }
 
+    func startCheckIn() {
+        if capture != nil && state.capturePhase != CapturePhase.idle.rawValue {
+            publish(status: "La captura de laboratorio está en curso")
+            return
+        }
+        AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+            DispatchQueue.main.async {
+                self?.continueCheckIn(cameraGranted: granted)
+            }
+        }
+    }
+
+    func onQrText(_ text: String) {
+        guard state.checkIn.listening, state.checkIn.qrText != text else { return }
+        state.checkIn.qrText = text
+        evaluateCheckIn()
+    }
+
     func exportFiles() -> [URL] {
         guard let path = state.sessionDirectory else { return [] }
         let directory = URL(fileURLWithPath: path, isDirectory: true)
@@ -208,6 +242,7 @@ final class LabController: ObservableObject {
             }
             if status == .denied || status == .restricted {
                 startPending = false
+                checkInArmWhenReady = false
                 reject(
                     type: EventTypes.permissionMissing,
                     errorCode: "PERMISSION",
@@ -223,6 +258,7 @@ final class LabController: ObservableObject {
             return
         case .unauthorized:
             startPending = false
+            checkInArmWhenReady = false
             reject(
                 type: EventTypes.permissionMissing,
                 errorCode: "PERMISSION",
@@ -232,6 +268,7 @@ final class LabController: ObservableObject {
             return
         case .poweredOff:
             startPending = false
+            checkInArmWhenReady = false
             reject(
                 type: EventTypes.error,
                 errorCode: "BLUETOOTH_OFF",
@@ -241,6 +278,7 @@ final class LabController: ObservableObject {
             return
         case .unsupported:
             startPending = false
+            checkInArmWhenReady = false
             reject(
                 type: EventTypes.error,
                 errorCode: "NO_BLUETOOTH",
@@ -278,6 +316,10 @@ final class LabController: ObservableObject {
             resumeAfterBluetooth = false
         }
         publish(status: "Recibiendo")
+        if checkInArmWhenReady {
+            checkInArmWhenReady = false
+            armCheckIn(ownsScan: true)
+        }
     }
 
     private func stopRadio(log: Bool) {
@@ -340,6 +382,7 @@ final class LabController: ObservableObject {
         capture = nil
         state.receiverDesired = false
         startPending = false
+        checkInArmWhenReady = false
         suspendedByBluetooth = false
         resumeAfterBluetooth = false
         stopRadio(log: true)
@@ -441,6 +484,10 @@ final class LabController: ObservableObject {
         state.liveClassification = classification.base.rawValue
         state.liveGrace = classification.boundaryGrace
         state.livePacketPeriod = packetPeriod
+        if state.checkIn.listening {
+            state.checkIn.bleIdentifier = code
+            evaluateCheckIn()
+        }
         if let runner = capture {
             let accepted = CodeClassifier.captureAccepted(code: code, classification: classification, expectedCode: config.expectedCode)
             let now = max(monotonic, runner.attemptStartedAt)
@@ -467,6 +514,7 @@ final class LabController: ObservableObject {
     private func tick() {
         refreshClock()
         tickCapture()
+        evaluateCheckIn()
         summaryTick += 1
         if summaryTick % 25 == 0 {
             store?.writeSummary(stats.summary())
@@ -622,6 +670,91 @@ final class LabController: ObservableObject {
         if recent.count > 120 { recent.removeFirst(recent.count - 120) }
         state.recentEvents = recent
         state.summary = stats.summary()
+    }
+
+    private func continueCheckIn(cameraGranted: Bool) {
+        guard cameraGranted else {
+            reject(
+                type: EventTypes.permissionMissing,
+                errorCode: "PERMISSION",
+                errorMessage: "cámara denegada",
+                status: "Falta el permiso de cámara"
+            )
+            return
+        }
+        let owned = !state.receiverDesired
+        let alreadyCustom = state.receiver.protocolName == "custom" && state.receiverScanning
+        state.receiver.protocolName = "custom"
+        state.receiver.periodSeconds = Simulation.periodSeconds
+        if owned {
+            checkInArmWhenReady = true
+            startReceiver()
+            return
+        }
+        if alreadyCustom {
+            armCheckIn(ownsScan: false)
+            return
+        }
+        stopRadio(log: false)
+        startRadio()
+        armCheckIn(ownsScan: false)
+    }
+
+    private func armCheckIn(ownsScan: Bool) {
+        state.checkIn.listening = true
+        state.checkIn.phase = "listening"
+        state.checkIn.message = CheckInCopy.listening
+        state.checkIn.qrText = nil
+        state.checkIn.bleIdentifier = nil
+        state.checkIn.step = nil
+        state.checkIn.startedMonotonic = monotonicMs()
+        state.checkIn.ownsScan = ownsScan
+        publish(status: CheckInCopy.listening)
+    }
+
+    private func evaluateCheckIn() {
+        guard state.checkIn.listening else { return }
+        let elapsed = monotonicMs() - state.checkIn.startedMonotonic
+        let view = Simulation.resolveCheckIn(
+            qrText: state.checkIn.qrText,
+            observedBle: state.checkIn.bleIdentifier,
+            phoneUnixSeconds: wallEpochMs() / 1000,
+            elapsedMs: elapsed,
+            consecutiveFailures: state.checkIn.failures
+        )
+        if view.phase == .listening {
+            state.checkIn.phase = "listening"
+            state.checkIn.message = view.message
+            return
+        }
+        let success = view.phase == .accepted
+        record(
+            type: EventTypes.checkin,
+            code: view.payload?.bleIdentifier ?? state.checkIn.bleIdentifier,
+            success: success,
+            errorCode: success ? "accepted" : (view.phase == .assisted ? "assisted" : "retry"),
+            errorMessage: success ? view.payload?.qrText : view.message
+        )
+        let owned = state.checkIn.ownsScan
+        state.checkIn.listening = false
+        state.checkIn.phase = view.phase == .accepted ? "accepted" : (view.phase == .assisted ? "assisted" : "retry")
+        state.checkIn.message = view.message
+        state.checkIn.qrText = view.payload?.qrText ?? state.checkIn.qrText
+        state.checkIn.bleIdentifier = view.payload?.bleIdentifier ?? state.checkIn.bleIdentifier
+        state.checkIn.step = view.payload?.step
+        state.checkIn.failures = view.consecutiveFailures
+        state.checkIn.ownsScan = false
+        if owned {
+            capture?.stop()
+            capture = nil
+            state.receiverDesired = false
+            state.capturePhase = CapturePhase.idle.rawValue
+            startPending = false
+            stopRadio(log: true)
+            record(type: EventTypes.sessionStop)
+            finishStore()
+        }
+        publish(status: view.message)
     }
 
     private func publish(status: String) {

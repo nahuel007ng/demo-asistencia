@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>es</string>
+	<key>CFBundleDisplayName</key>
+	<string>BLE Lab</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>BLE Lab lee el QR del kiosco para armar la fichada de laboratorio. No guarda la imagen.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>BLE Lab escanea anuncios Bluetooth de baja energía para medir la recepción de identificadores rotativos. No se conecta a dispositivos ni transmite datos.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>BLE Lab escanea anuncios Bluetooth de baja energía para medir la recepción de identificadores rotativos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>BLE Lab usa la ubicación mientras la app está abierta para detectar balizas iBeacon y medir si iOS entrega los códigos rotativos. No se guarda la posición.</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>

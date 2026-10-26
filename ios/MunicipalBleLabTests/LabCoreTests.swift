@@ -235,6 +235,149 @@ final class LabCoreTests: XCTestCase {
         XCTAssertTrue((json["clockNote"] as? String)?.contains("no están sincronizados") == true)
     }
 
+    func testSimulationFixtureMatchesTheSharedVector() throws {
+        let row = try fixture("simulation.json")
+        let epoch = int64(row, "unixEpochSeconds")
+        let frame = Simulation.kioskFrame(unixEpochSeconds: epoch)
+        XCTAssertEqual(int64(row, "T"), frame.step)
+        XCTAssertEqual(string(row, "token"), frame.token)
+        XCTAssertEqual(string(row, "qr"), frame.qrText)
+        XCTAssertEqual(int64(row, "bleIdentifier"), frame.bleIdentifier)
+        XCTAssertEqual(string(row, "serviceDataHex").lowercased(), toHex(frame.serviceData).lowercased())
+        XCTAssertNotEqual(frame.token, String(frame.bleIdentifier))
+        XCTAssertFalse(frame.qrText.contains(Simulation.secret))
+    }
+
+    func testCounterIsEightBigEndianBytesAndNotAThirtySecondTotp() {
+        let step: Int64 = 113_333_333
+        XCTAssertEqual([0, 0, 0, 0, 0x06, 0xC1, 0x54, 0x55], Simulation.counterBytes(step))
+        XCTAssertNotEqual(Array("113333333".utf8), Simulation.counterBytes(step))
+        let epoch: Int64 = 1_699_999_995
+        XCTAssertEqual(step, Simulation.step(epoch))
+        XCTAssertNotEqual(Simulation.token(step: epoch / 30), Simulation.token(step: Simulation.step(epoch)))
+    }
+
+    func testQrAndBleStayInsideTheWindowAndChangeOnTheNextOne() {
+        let start: Int64 = 1_699_999_995
+        let first = Simulation.kioskFrame(unixEpochSeconds: start)
+        let inside = Simulation.kioskFrame(unixEpochSeconds: start + 14)
+        let next = Simulation.kioskFrame(unixEpochSeconds: start + 15)
+        XCTAssertEqual(first.qrText, inside.qrText)
+        XCTAssertEqual(first.bleIdentifier, inside.bleIdentifier)
+        XCTAssertNotEqual(first.qrText, next.qrText)
+        XCTAssertNotEqual(first.bleIdentifier, next.bleIdentifier)
+        XCTAssertNotEqual(first.token, next.token)
+    }
+
+    func testParserAcceptsTheFixtureAndRejectsABrokenQr() throws {
+        let row = try fixture("simulation.json")
+        let qr = string(row, "qr")
+        let step = int64(row, "T")
+        let parsed = try XCTUnwrap(Simulation.parseQr(qr))
+        XCTAssertEqual(Simulation.kioskId, parsed.kioskId)
+        XCTAssertEqual(string(row, "token"), parsed.token)
+        XCTAssertEqual(step, parsed.step)
+        XCTAssertNil(Simulation.parseQr("\(qr)|extra"))
+        XCTAssertNil(Simulation.parseQr("v2|lab|kiosco-01|689177|\(step)"))
+        XCTAssertNil(Simulation.parseQr("v1|\(Simulation.kioskId)|689177|\(step)"))
+        XCTAssertNil(Simulation.parseQr("v2|\(Simulation.kioskId)|68917|\(step)"))
+        XCTAssertNil(Simulation.parseQr("v2|\(Simulation.kioskId)|6891771|\(step)"))
+    }
+
+    func testPairAcceptsTheFixtureWindowAndOneNeighbour() throws {
+        let row = try fixture("simulation.json")
+        let qr = string(row, "qr")
+        let step = int64(row, "T")
+        let ble = int64(row, "bleIdentifier")
+        XCTAssertTrue(Simulation.pairValid(qrText: qr, observedBle: ble, phoneStep: step))
+        XCTAssertTrue(Simulation.pairValid(qrText: qr, observedBle: Simulation.bleIdentifier(step: step - 1), phoneStep: step))
+        XCTAssertTrue(Simulation.pairValid(qrText: qr, observedBle: Simulation.bleIdentifier(step: step + 1), phoneStep: step))
+        XCTAssertFalse(Simulation.pairValid(qrText: qr, observedBle: Simulation.bleIdentifier(step: step + 2), phoneStep: step))
+        XCTAssertFalse(Simulation.pairValid(qrText: qr, observedBle: ble, phoneStep: step + 2))
+        XCTAssertFalse(Simulation.pairValid(qrText: qr.replacingOccurrences(of: string(row, "token"), with: "000000"), observedBle: ble, phoneStep: step))
+        XCTAssertFalse(Simulation.pairValid(qrText: qr.replacingOccurrences(of: Simulation.kioskId, with: "otro-kiosco"), observedBle: ble, phoneStep: step))
+    }
+
+    func testPayloadGoesToTheInProcessMockWithoutTheSecret() throws {
+        let row = try fixture("simulation.json")
+        let qr = string(row, "qr")
+        let step = int64(row, "T")
+        let ble = int64(row, "bleIdentifier")
+        let body = try XCTUnwrap(Simulation.payload(qrText: qr, observedBle: ble))
+        XCTAssertEqual(Simulation.payloadKind, body.kind)
+        XCTAssertEqual(Simulation.kioskId, body.kioskId)
+        XCTAssertEqual(string(row, "token"), body.token)
+        XCTAssertEqual(step, body.step)
+        XCTAssertEqual(ble, body.bleIdentifier)
+        XCTAssertEqual(qr, body.qrText)
+        XCTAssertFalse(body.qrText.contains(Simulation.secret))
+        XCTAssertTrue(Simulation.mockAccept(body, phoneStep: step))
+        var tampered = body
+        tampered = CheckInPayload(
+            kind: body.kind,
+            kioskId: body.kioskId,
+            token: "000000",
+            step: body.step,
+            bleIdentifier: body.bleIdentifier,
+            qrText: body.qrText
+        )
+        XCTAssertFalse(Simulation.mockAccept(tampered, phoneStep: step))
+    }
+
+    func testCheckInAcceptsAPairAndAsksAgainAfterTheCeiling() throws {
+        let row = try fixture("simulation.json")
+        let epoch = int64(row, "unixEpochSeconds")
+        let qr = string(row, "qr")
+        let ble = int64(row, "bleIdentifier")
+        let accepted = Simulation.resolveCheckIn(qrText: qr, observedBle: ble, phoneUnixSeconds: epoch, elapsedMs: 1_000, consecutiveFailures: 0)
+        XCTAssertEqual(CheckInPhase.accepted, accepted.phase)
+        XCTAssertEqual(CheckInCopy.success, accepted.message)
+        XCTAssertEqual(qr, accepted.payload?.qrText)
+        XCTAssertEqual(ble, accepted.payload?.bleIdentifier)
+        XCTAssertEqual(0, accepted.consecutiveFailures)
+
+        let waiting = Simulation.resolveCheckIn(qrText: nil, observedBle: ble, phoneUnixSeconds: epoch, elapsedMs: 1_000, consecutiveFailures: 0)
+        XCTAssertEqual(CheckInPhase.listening, waiting.phase)
+
+        let retry = Simulation.resolveCheckIn(qrText: qr, observedBle: nil, phoneUnixSeconds: epoch, elapsedMs: Simulation.checkInLimitMs, consecutiveFailures: 0)
+        XCTAssertEqual(CheckInPhase.retry, retry.phase)
+        XCTAssertEqual(CheckInCopy.retry, retry.message)
+        XCTAssertEqual(1, retry.consecutiveFailures)
+
+        let assisted = Simulation.resolveCheckIn(qrText: qr, observedBle: nil, phoneUnixSeconds: epoch, elapsedMs: Simulation.checkInLimitMs, consecutiveFailures: 1)
+        XCTAssertEqual(CheckInPhase.assisted, assisted.phase)
+        XCTAssertEqual(CheckInCopy.assisted, assisted.message)
+        XCTAssertEqual(2, assisted.consecutiveFailures)
+    }
+
+    func testExportKeepsTheQrAndTheCheckInWithoutCountingThemAsRadioErrors() throws {
+        let row = try fixture("simulation.json")
+        let qr = string(row, "qr")
+        let ble = int64(row, "bleIdentifier")
+        var shown = baseEvent(EventTypes.qrShown, role: "emitter")
+        shown.code = ble
+        shown.errorMessage = qr
+        var checkIn = baseEvent(EventTypes.checkin, role: "receiver")
+        checkIn.code = ble
+        checkIn.success = true
+        checkIn.errorMessage = qr
+        var failed = baseEvent(EventTypes.checkin, role: "receiver")
+        failed.success = false
+        failed.errorCode = "timeout"
+        failed.errorMessage = CheckInCopy.retry
+        let csv = SessionExport.csv([shown, checkIn, failed])
+        XCTAssertTrue(csv.contains("qr_shown"))
+        XCTAssertTrue(csv.contains("checkin"))
+        XCTAssertTrue(csv.contains(qr))
+        XCTAssertTrue(csv.contains(String(ble)))
+        let stats = RunningStats()
+        stats.absorb(shown)
+        stats.absorb(checkIn)
+        stats.absorb(failed)
+        XCTAssertEqual(0, stats.summary().emitterErrors)
+        XCTAssertEqual(0, stats.summary().receiverErrors)
+    }
+
     private func observation(code: Int64, monotonic: Int64, wall: Int64, classification: String) -> SessionEvent {
         var event = baseEvent(EventTypes.observation, role: "receiver")
         event.monotonicMs = monotonic

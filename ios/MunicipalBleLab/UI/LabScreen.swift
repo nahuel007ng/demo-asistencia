@@ -42,6 +42,7 @@ struct LabScreen: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Receptor").font(.title2)
             Text(lab.state.status)
+            checkIn
             Text("Bluetooth: \(lab.state.bluetoothState) · ubicación: \(lab.state.locationState)")
                 .font(.subheadline)
             if lab.state.locationState == "denegada" || lab.state.bluetoothState == "sin permiso" {
@@ -176,6 +177,31 @@ struct LabScreen: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var checkIn: some View {
+        let item = lab.state.checkIn
+        let again = item.phase == "retry" || item.phase == "assisted"
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Fichada").font(.title3)
+            if !item.message.isEmpty {
+                Text(item.message).font(.title2)
+            }
+            if item.phase == "accepted" {
+                if let qr = item.qrText {
+                    Text(qr).font(.system(.footnote, design: .monospaced))
+                }
+                Text("BLE \(formatCode(item.bleIdentifier)) · ventana \(item.step.map(String.init) ?? "—")")
+            }
+            if item.listening {
+                QrScanner { text in lab.onQrText(text) }
+                    .frame(height: 240)
+                Text(CheckInCopy.listening).font(.footnote)
+            } else {
+                Button(again ? "Intentar de nuevo" : "Fichar") { lab.startCheckIn() }
+                    .disabled(lab.state.capturePhase == "running" || lab.state.capturePhase == "gap")
+            }
+        }
     }
 
     private func choice(options: [(String, String)], selected: String, onSelect: @escaping (String) -> Void) -> some View {

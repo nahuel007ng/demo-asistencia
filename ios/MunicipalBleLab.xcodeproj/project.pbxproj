@@ -20,6 +20,8 @@
 		F1000000000000000000000B /* EventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000B /* EventStore.swift */; };
 		F1000000000000000000000C /* LabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000C /* LabController.swift */; };
 		F1000000000000000000000D /* LabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000D /* LabScreen.swift */; };
+		F10000000000000000000011 /* Simulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000011 /* Simulation.swift */; };
+		F10000000000000000000012 /* QrScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000012 /* QrScanner.swift */; };
 		F1000000000000000000000E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FF000000000000000000000E /* PrivacyInfo.xcprivacy */; };
 		F10000000000000000000010 /* LabCoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF0000000000000000000010 /* LabCoreTests.swift */; };
 		F100000000000000000000C1 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF00000000000000000000C1 /* CoreLocation.framework */; };
@@ -51,6 +53,8 @@
 		FF000000000000000000000B /* EventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventStore.swift; sourceTree = "<group>"; };
 		FF000000000000000000000C /* LabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabController.swift; sourceTree = "<group>"; };
 		FF000000000000000000000D /* LabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabScreen.swift; sourceTree = "<group>"; };
+		FF0000000000000000000011 /* Simulation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Simulation.swift; sourceTree = "<group>"; };
+		FF0000000000000000000012 /* QrScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrScanner.swift; sourceTree = "<group>"; };
 		FF000000000000000000000E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FF000000000000000000000F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF0000000000000000000010 /* LabCoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabCoreTests.swift; sourceTree = "<group>"; };
@@ -116,6 +120,7 @@
 				FF0000000000000000000006 /* Classification.swift */,
 				FF0000000000000000000007 /* Metrics.swift */,
 				FF0000000000000000000008 /* SessionExport.swift */,
+				FF0000000000000000000011 /* Simulation.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -142,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				FF000000000000000000000D /* LabScreen.swift */,
+				FF0000000000000000000012 /* QrScanner.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -277,6 +283,8 @@
 				F1000000000000000000000B /* EventStore.swift in Sources */,
 				F1000000000000000000000C /* LabController.swift in Sources */,
 				F1000000000000000000000D /* LabScreen.swift in Sources */,
+				F10000000000000000000011 /* Simulation.swift in Sources */,
+				F10000000000000000000012 /* QrScanner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -40,4 +40,6 @@ enum EventTypes {
     static let captureAttempt = "capture_attempt"
     static let unsupportedVersion = "unsupported_version"
     static let error = "error"
+    static let qrShown = "qr_shown"
+    static let checkin = "checkin"
 }
