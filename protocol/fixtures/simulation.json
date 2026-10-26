@@ -1,0 +1,16 @@
+{
+  "description": "Vector normativo de la simulación QR + BLE. Mismas constantes en Android y en iOS. No reemplaza el identificador por índice de ventana.",
+  "secretUtf8": "lab-secreto-mock",
+  "kioskId": "lab-kiosco-01",
+  "labelUtf8": "asis-ble-v1",
+  "unixEpochSeconds": 1699999995,
+  "periodSeconds": 15,
+  "T": 113333333,
+  "counterEncoding": "uint64-be",
+  "qr": "v2|lab-kiosco-01|689177|113333333",
+  "token": "689177",
+  "bleIdentifier": 2549408697,
+  "bleIdentifierHex": "97f4e3b9",
+  "serviceDataHex": "010197f4e3b9000fc5",
+  "serviceDataNotes": "version 0x01, flags temporales 0x01, identifier, period 15, measured power -59. La potencia no sale del secreto."
+}
