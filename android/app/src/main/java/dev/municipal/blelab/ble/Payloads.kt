@@ -7,6 +7,7 @@ import dev.municipal.blelab.core.IBeaconCodec
 import dev.municipal.blelab.core.IdentifierSchedule
 import dev.municipal.blelab.core.LabConstants
 import dev.municipal.blelab.core.RotatingIdentifier
+import dev.municipal.blelab.core.Simulation
 import dev.municipal.blelab.session.EmitterConfig
 import java.util.UUID
 
@@ -14,9 +15,26 @@ data class BuiltAdvertisement(
     val data: AdvertiseData,
     val identifier: RotatingIdentifier,
     val timeDerived: Boolean,
+    val qrText: String? = null,
 )
 
 fun buildAdvertisement(config: EmitterConfig, unixEpochSeconds: Long): BuiltAdvertisement {
+    if (config.protocol == "kiosk") {
+        val frame = Simulation.kioskFrame(
+            unixEpochSeconds,
+            config.measuredPower ?: LabConstants.DEFAULT_MEASURED_POWER,
+        )
+        val identifier = IdentifierSchedule.fromRaw(frame.bleIdentifier)
+        val data = AdvertiseData.Builder()
+            .setIncludeDeviceName(false)
+            .setIncludeTxPowerLevel(false)
+            .addServiceData(
+                ParcelUuid(UUID.fromString(LabConstants.SERVICE_UUID)),
+                frame.serviceData,
+            )
+            .build()
+        return BuiltAdvertisement(data, identifier, timeDerived = true, qrText = frame.qrText)
+    }
     val identifier = if (config.fixedIdentifier) {
         IdentifierSchedule.fromRaw(config.fixedValue ?: 0L)
     } else {

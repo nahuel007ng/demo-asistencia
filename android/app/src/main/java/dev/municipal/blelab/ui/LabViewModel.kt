@@ -59,6 +59,21 @@ class LabViewModel : ViewModel() {
         }
     }
 
+    fun startCheckIn(ask: (List<String>) -> Unit) {
+        val current = controller ?: return
+        val missing = current.missingCheckInPermissions()
+        if (missing.isNotEmpty()) {
+            pending = "checkin"
+            ask(missing)
+        } else {
+            current.startCheckIn()
+        }
+    }
+
+    fun onQrText(text: String) {
+        controller?.onQrText(text)
+    }
+
     fun startCapture(ask: (List<String>) -> Unit) {
         val current = controller ?: return
         val missing = current.missingPermissions(emitter = false)
@@ -83,6 +98,7 @@ class LabViewModel : ViewModel() {
             "emitter" -> current?.startEmitter()
             "receiver" -> current?.startReceiver()
             "capture" -> current?.startCapture()
+            "checkin" -> current?.startCheckIn()
         }
         pending = null
     }

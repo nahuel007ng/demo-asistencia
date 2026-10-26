@@ -24,12 +24,17 @@ import dev.municipal.blelab.ble.parseScanResult
 import dev.municipal.blelab.ble.probeCapabilities
 import dev.municipal.blelab.core.CapturePhase
 import dev.municipal.blelab.core.CaptureRunner
+import dev.municipal.blelab.core.CheckInCopy
+import dev.municipal.blelab.core.CheckInPhase
+import dev.municipal.blelab.core.CheckInView
 import dev.municipal.blelab.core.CodeClassifier
 import dev.municipal.blelab.core.EventTypes
 import dev.municipal.blelab.core.IdentifierSchedule
+import dev.municipal.blelab.core.LabConstants
 import dev.municipal.blelab.core.LabPermissions
 import dev.municipal.blelab.core.RunningStats
 import dev.municipal.blelab.core.SessionEvent
+import dev.municipal.blelab.core.Simulation
 import dev.municipal.blelab.core.formatUtc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,6 +68,7 @@ class LabController(
     private val loggedVersions = mutableSetOf<Int>()
     private var lastCallbackDelayLogMs = 0L
     private var summaryTick = 0
+    private var loggedQrStep: Long? = null
 
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
@@ -110,11 +116,12 @@ class LabController(
         }
     }
 
-    fun missingPermissions(emitter: Boolean): List<String> {
-        val names = if (emitter) LabPermissions.forEmitter(Build.VERSION.SDK_INT) else LabPermissions.forReceiver(Build.VERSION.SDK_INT)
-        return names.filter {
-            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
-        }
+    fun missingPermissions(emitter: Boolean): List<String> = missing(if (emitter) LabPermissions.forEmitter(Build.VERSION.SDK_INT) else LabPermissions.forReceiver(Build.VERSION.SDK_INT))
+
+    fun missingCheckInPermissions(): List<String> = missing(LabPermissions.forCheckIn(Build.VERSION.SDK_INT))
+
+    private fun missing(names: List<String>): List<String> = names.filter {
+        ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
     }
 
     fun logPermissionMissing(role: String, names: List<String>) {
@@ -135,6 +142,7 @@ class LabController(
 
     fun stopEmitter() {
         onThread {
+            loggedQrStep = null
             uiState.update { it.copy(emitterDesired = false) }
             rotationToken++
             stopEmitterRadio(log = true)
@@ -184,6 +192,19 @@ class LabController(
         }
     }
 
+    fun startCheckIn() {
+        onThread { startCheckInOnThread() }
+    }
+
+    fun onQrText(text: String) {
+        onThread {
+            val check = uiState.value.checkIn
+            if (!check.listening || check.qrText == text) return@onThread
+            uiState.update { it.copy(checkIn = it.checkIn.copy(qrText = text)) }
+            tickCheckIn()
+        }
+    }
+
     fun exportFiles(): List<File> {
         if (Looper.myLooper() == handler.looper) return exportOnThread()
         val ready = CountDownLatch(1)
@@ -206,6 +227,19 @@ class LabController(
     }
 
     private fun startEmitterOnThread() {
+        if (uiState.value.emitter.protocol == "kiosk") {
+            uiState.update {
+                it.copy(
+                    emitter = it.emitter.copy(
+                        method = "restart",
+                        periodSeconds = Simulation.PERIOD_SECONDS,
+                        intervalMs = 100,
+                        connectable = false,
+                        fixedIdentifier = false,
+                    ),
+                )
+            }
+        }
         val config = uiState.value.emitter
         val caps = probeCapabilities(context)
         refreshCapabilities(caps)
@@ -263,6 +297,7 @@ class LabController(
                 onAirMinor = built.identifier.minor,
             )
         }
+        noteKioskFrame(System.currentTimeMillis() / 1000, log = true)
     }
 
     private val advertiserListener = object : LabAdvertiser.Listener {
@@ -344,6 +379,7 @@ class LabController(
             wall = scheduledWall,
         )
         advertiser?.update(built.data)
+        noteKioskFrame(System.currentTimeMillis() / 1000, log = true)
     }
 
     private fun stopEmitterRadio(log: Boolean) {
@@ -469,6 +505,10 @@ class LabController(
                 livePacketPeriod = frame.packetPeriod,
             )
         }
+        if (uiState.value.checkIn.listening) {
+            uiState.update { it.copy(checkIn = it.checkIn.copy(bleIdentifier = frame.code)) }
+            tickCheckIn()
+        }
         val runner = capture ?: return
         val accepted = CodeClassifier.captureAccepted(frame.code, classification, config.expectedCode)
         val now = maxOf(stackElapsedMs, runner.attemptStartedAt)
@@ -560,6 +600,8 @@ class LabController(
                 captureRepeats = capture?.repeats ?: 0,
             )
         }
+        noteKioskFrame(now, log = uiState.value.emitterDesired)
+        tickCheckIn()
     }
 
     private fun tickCapture() {
@@ -672,6 +714,129 @@ class LabController(
         return File(base, "sessions")
     }
 
+    private fun noteKioskFrame(unixEpochSeconds: Long, log: Boolean) {
+        if (uiState.value.emitter.protocol != "kiosk") return
+        val frame = Simulation.kioskFrame(
+            unixEpochSeconds,
+            uiState.value.emitter.measuredPower ?: LabConstants.DEFAULT_MEASURED_POWER,
+        )
+        uiState.update {
+            it.copy(
+                kioskQr = frame.qrText,
+                kioskToken = frame.token,
+                kioskStep = frame.step,
+                kioskBle = frame.bleIdentifier,
+            )
+        }
+        if (!log || loggedQrStep == frame.step) return
+        loggedQrStep = frame.step
+        record(
+            type = EventTypes.QR_SHOWN,
+            role = "emitter",
+            code = frame.bleIdentifier,
+            errorMessage = frame.qrText,
+        )
+    }
+
+    private fun startCheckInOnThread() {
+        if (capture?.phase == CapturePhase.RUNNING || capture?.phase == CapturePhase.GAP) {
+            publish(status = "La captura de laboratorio está en curso")
+            return
+        }
+        val missing = missingCheckInPermissions()
+        if (missing.isNotEmpty()) {
+            reject("receiver", EventTypes.PERMISSION_MISSING, "PERMISSION", missing.joinToString(","), "Faltan permisos para fichar")
+            return
+        }
+        val caps = probeCapabilities(context)
+        refreshCapabilities(caps)
+        if (!caps.bluetoothEnabled) {
+            reject("receiver", EventTypes.ERROR, "BLUETOOTH_OFF", "Bluetooth apagado", "Bluetooth está apagado")
+            return
+        }
+        val owned = !uiState.value.receiverDesired
+        uiState.update {
+            it.copy(receiver = it.receiver.copy(protocol = "custom", periodSeconds = Simulation.PERIOD_SECONDS))
+        }
+        if (owned) {
+            startReceiverOnThread()
+            if (!uiState.value.receiverDesired) return
+        } else {
+            stopReceiverRadio(log = false)
+            startReceiverRadio()
+        }
+        val failures = uiState.value.checkIn.failures
+        uiState.update {
+            it.copy(
+                checkIn = CheckInUi(
+                    listening = true,
+                    phase = "listening",
+                    message = CheckInCopy.LISTENING,
+                    failures = failures,
+                    startedElapsed = SystemClock.elapsedRealtime(),
+                    ownsScan = owned,
+                ),
+            )
+        }
+        publish(status = CheckInCopy.LISTENING)
+    }
+
+    private fun tickCheckIn() {
+        val check = uiState.value.checkIn
+        if (!check.listening) return
+        val view = Simulation.resolveCheckIn(
+            qrText = check.qrText,
+            bleIdentifier = check.bleIdentifier,
+            phoneUnixSeconds = System.currentTimeMillis() / 1000,
+            elapsedMs = SystemClock.elapsedRealtime() - check.startedElapsed,
+            consecutiveFailures = check.failures,
+        )
+        if (view.phase == CheckInPhase.LISTENING) {
+            if (check.message != view.message) {
+                uiState.update { it.copy(checkIn = it.checkIn.copy(phase = "listening", message = view.message)) }
+            }
+            return
+        }
+        finishCheckIn(view)
+    }
+
+    private fun finishCheckIn(view: CheckInView) {
+        val check = uiState.value.checkIn
+        val success = view.phase == CheckInPhase.ACCEPTED
+        record(
+            type = EventTypes.CHECKIN,
+            role = "receiver",
+            code = view.payload?.bleIdentifier ?: check.bleIdentifier,
+            success = success,
+            errorCode = if (success) "accepted" else view.phase.name.lowercase(),
+            errorMessage = if (success) view.payload?.qrText else view.message,
+        )
+        val owned = check.ownsScan
+        uiState.update {
+            it.copy(
+                checkIn = check.copy(
+                    listening = false,
+                    phase = view.phase.name.lowercase(),
+                    message = view.message,
+                    qrText = view.payload?.qrText ?: check.qrText,
+                    bleIdentifier = view.payload?.bleIdentifier ?: check.bleIdentifier,
+                    step = view.payload?.step,
+                    failures = view.consecutiveFailures,
+                    ownsScan = false,
+                ),
+            )
+        }
+        if (owned) {
+            capture?.stop()
+            capture = null
+            uiState.update { it.copy(receiverDesired = false, capturePhase = "idle") }
+            stopReceiverRadio(log = true)
+            record(EventTypes.SESSION_STOP, role = "receiver")
+            closeStoreIfIdle()
+        }
+        publish(status = view.message)
+    }
+
     private fun record(
         type: String,
         role: String,
@@ -692,7 +857,8 @@ class LabController(
         val configPeriod = if (role == "emitter") state.emitter.periodSeconds else state.receiver.periodSeconds
         val interval = if (role == "emitter") state.emitter.intervalMs else 0
         val method = if (role == "emitter") state.emitter.method else ""
-        val protocol = if (role == "emitter") state.emitter.protocol else state.receiver.protocol
+        val rawProtocol = if (role == "emitter") state.emitter.protocol else state.receiver.protocol
+        val protocol = if (rawProtocol == "kiosk") "custom" else rawProtocol
         val connectable = role == "emitter" && state.emitter.connectable
         val resolvedMajor = major ?: code?.let { ((it shr 16) and 0xFFFF).toInt() }
         val resolvedMinor = minor ?: code?.let { (it and 0xFFFF).toInt() }

@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -29,10 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import dev.municipal.blelab.core.CheckInCopy
 import dev.municipal.blelab.core.LabConstants
 import dev.municipal.blelab.core.LabPermissions
 import dev.municipal.blelab.core.LabSummary
 import dev.municipal.blelab.core.SessionEvent
+import dev.municipal.blelab.core.Simulation
 import dev.municipal.blelab.session.LabUiState
 
 @Composable
@@ -91,17 +95,35 @@ private fun EmitterPane(
         if (!caps.bluetoothEnabled) {
             Button(onClick = onOpenBluetoothSettings) { Text("Abrir ajustes de Bluetooth") }
         }
+        val kiosk = config.protocol == "kiosk"
+        val kioskOnAir = kiosk && state.emitterDesired
         Text("Protocolo")
         ChoiceRow(
-            options = listOf("ibeacon" to "iBeacon", "custom" to "BLE propio"),
+            options = listOf("ibeacon" to "iBeacon", "custom" to "BLE propio", "kiosk" to "Kiosco"),
             selected = config.protocol,
-            onSelect = { value -> viewModel.editEmitter { it.copy(protocol = value) } },
+            enabled = { !kioskOnAir },
+            onSelect = { value ->
+                viewModel.editEmitter {
+                    if (value == "kiosk") {
+                        it.copy(
+                            protocol = "kiosk",
+                            method = "restart",
+                            periodSeconds = Simulation.PERIOD_SECONDS,
+                            intervalMs = 100,
+                            connectable = false,
+                            fixedIdentifier = false,
+                        )
+                    } else {
+                        it.copy(protocol = value)
+                    }
+                }
+            },
         )
         Text("Método")
         ChoiceRow(
             options = listOf("restart" to "Reiniciar", "update_set" to "Actualizar"),
             selected = config.method,
-            enabled = { value -> value != "update_set" || caps.canUpdateWithoutRestart },
+            enabled = { value -> !kiosk && (value != "update_set" || caps.canUpdateWithoutRestart) },
             onSelect = { value -> viewModel.editEmitter { it.copy(method = value) } },
         )
         if (!caps.advertisingSetApi) {
@@ -111,17 +133,23 @@ private fun EmitterPane(
         ChoiceRow(
             options = listOf(10, 15, 30).map { it.toString() to "${it} s" },
             selected = config.periodSeconds.toString(),
+            enabled = { !kiosk },
             onSelect = { value -> viewModel.editEmitter { it.copy(periodSeconds = value.toInt()) } },
         )
         Text("Intervalo")
         ChoiceRow(
             options = LabConstants.advertiseIntervalsMs.map { it.toString() to "${it} ms" },
             selected = config.intervalMs.toString(),
+            enabled = { !kiosk },
             onSelect = { value -> viewModel.editEmitter { it.copy(intervalMs = value.toInt()) } },
         )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Conectable")
-            Switch(checked = config.connectable, onCheckedChange = { checked -> viewModel.editEmitter { it.copy(connectable = checked) } })
+            Switch(
+                checked = config.connectable,
+                onCheckedChange = { checked -> viewModel.editEmitter { it.copy(connectable = checked) } },
+                enabled = !kiosk,
+            )
         }
         Text("Apagado es el anuncio legacy no conectable. Encendido sirve para comparar el caso en que Android agrega flags.")
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -129,6 +157,7 @@ private fun EmitterPane(
             Switch(
                 checked = config.fixedIdentifier,
                 onCheckedChange = { checked -> viewModel.editEmitter { it.copy(fixedIdentifier = checked) } },
+                enabled = !kiosk,
             )
         }
         if (config.fixedIdentifier) {
@@ -145,9 +174,26 @@ private fun EmitterPane(
             label = { Text("Potencia medida (dBm)") },
             modifier = Modifier.fillMaxWidth(),
         )
-        val shownCode = if (state.emitterDesired) state.onAirCode else state.clockCode
+        val shownCode = when {
+            kiosk -> state.kioskBle
+            state.emitterDesired -> state.onAirCode
+            else -> state.clockCode
+        }
+        if (kiosk) {
+            state.kioskQr?.let { qr ->
+                Text("Kiosco ${Simulation.KIOSK_ID}")
+                QrImage(qr, Modifier.size(280.dp))
+                Text(qr, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+                Text("Token ${state.kioskToken ?: "—"} · ventana ${state.kioskStep ?: "—"}")
+            }
+        }
         CodeCard(
-            title = if (state.emitterDesired) "En el aire" else "Ventana UTC actual, todavía no se emite",
+            title = when {
+                kiosk && state.emitterDesired -> "BLE en el aire"
+                kiosk -> "BLE de esta ventana, todavía no se emite"
+                state.emitterDesired -> "En el aire"
+                else -> "Ventana UTC actual, todavía no se emite"
+            },
             code = shownCode,
             major = shownCode.highWord(),
             minor = shownCode.lowWord(),
@@ -158,15 +204,23 @@ private fun EmitterPane(
             },
         )
         if (state.emitterDesired) {
-            Button(onClick = viewModel::stopEmitter, modifier = Modifier.fillMaxWidth()) { Text("Detener emisión") }
+            Button(onClick = viewModel::stopEmitter, modifier = Modifier.fillMaxWidth()) {
+                Text(if (kiosk) "Detener kiosco" else "Detener emisión")
+            }
         } else {
             Button(
                 onClick = { viewModel.startEmitter(onRequestPermissions) },
                 enabled = caps.canAdvertise || caps.securityException || !caps.bluetoothSupported,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Iniciar emisión") }
+            ) { Text(if (kiosk) "Iniciar kiosco" else "Iniciar emisión") }
         }
-        Text("El código temporal es el índice de la ventana UTC. Los anuncios se repiten durante toda la ventana.")
+        Text(
+            if (kiosk) {
+                "El QR y el BLE salen del secreto de laboratorio y cambian juntos cada 15 s. El anuncio se reinicia en cada ventana."
+            } else {
+                "El código temporal es el índice de la ventana UTC. Los anuncios se repiten durante toda la ventana."
+            },
+        )
     }
 }
 
@@ -182,6 +236,7 @@ private fun ReceiverPane(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Receptor", style = MaterialTheme.typography.headlineSmall)
         Text(state.status)
+        CheckInBlock(state, viewModel, onRequestPermissions)
         if (!state.capabilities.locationServiceEnabled) {
             Text("La ubicación del sistema está apagada. En Android 7 a 11 el escaneo no arranca sin ella. En versiones nuevas igual puede hacer falta, porque no se usa neverForLocation.")
             Button(onClick = onOpenLocationSettings) { Text("Abrir ajustes de ubicación") }
@@ -389,5 +444,34 @@ fun permissionLabel(name: String): String = when (name) {
     LabPermissions.ADVERTISE -> "Dispositivos cercanos, emisión"
     LabPermissions.CONNECT -> "Dispositivos cercanos, conexión"
     LabPermissions.NOTIFICATIONS -> "Notificaciones"
+    LabPermissions.CAMERA -> "Cámara"
     else -> name
+}
+
+@Composable
+private fun CheckInBlock(
+    state: LabUiState,
+    viewModel: LabViewModel,
+    onRequestPermissions: (List<String>) -> Unit,
+) {
+    val check = state.checkIn
+    Text("Fichada", style = MaterialTheme.typography.titleMedium)
+    if (check.message.isNotEmpty()) {
+        Text(check.message, style = MaterialTheme.typography.titleLarge)
+    }
+    if (check.phase == "accepted") {
+        check.qrText?.let { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }
+        Text("BLE ${formatCode(check.bleIdentifier)} · ventana ${check.step ?: "—"}")
+    }
+    if (check.listening) {
+        QrCamera(onText = viewModel::onQrText, modifier = Modifier.fillMaxWidth().height(240.dp))
+        Text(CheckInCopy.LISTENING)
+    } else {
+        val again = check.phase == "retry" || check.phase == "assisted"
+        Button(
+            onClick = { viewModel.startCheckIn(onRequestPermissions) },
+            enabled = state.capturePhase != "running" && state.capturePhase != "gap",
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(if (again) "Intentar de nuevo" else "Fichar") }
+    }
 }

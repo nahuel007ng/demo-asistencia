@@ -6,6 +6,18 @@ import dev.municipal.blelab.core.LabSummary
 import dev.municipal.blelab.core.RunningStats
 import dev.municipal.blelab.core.SessionEvent
 
+data class CheckInUi(
+    val listening: Boolean = false,
+    val phase: String = "idle",
+    val message: String = "",
+    val qrText: String? = null,
+    val bleIdentifier: Long? = null,
+    val step: Long? = null,
+    val failures: Int = 0,
+    val startedElapsed: Long = 0,
+    val ownsScan: Boolean = false,
+)
+
 data class EmitterConfig(
     val protocol: String = "ibeacon",
     val method: String = "restart",
@@ -73,4 +85,9 @@ data class LabUiState(
     val status: String = "Listo",
     val sessionDirectory: String? = null,
     val activeRole: String? = null,
+    val kioskQr: String? = null,
+    val kioskToken: String? = null,
+    val kioskStep: Long? = null,
+    val kioskBle: Long? = null,
+    val checkIn: CheckInUi = CheckInUi(),
 )
