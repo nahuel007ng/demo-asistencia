@@ -42,6 +42,8 @@ object EventTypes {
     const val CAPTURE_ATTEMPT = "capture_attempt"
     const val UNSUPPORTED_VERSION = "unsupported_version"
     const val ERROR = "error"
+    const val QR_SHOWN = "qr_shown"
+    const val CHECKIN = "checkin"
 }
 
 object LabPermissions {
@@ -50,6 +52,9 @@ object LabPermissions {
     const val ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
     const val CONNECT = "android.permission.BLUETOOTH_CONNECT"
     const val NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
+    const val CAMERA = "android.permission.CAMERA"
+
+    fun forCheckIn(sdkInt: Int): List<String> = forReceiver(sdkInt) + CAMERA
 
     fun forReceiver(sdkInt: Int): List<String> = buildList {
         if (sdkInt >= 31) {
