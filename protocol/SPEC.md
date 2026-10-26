@@ -28,7 +28,7 @@ En el instante exacto del límite, el identificador ya es el de la ventana nueva
 
 El modo de identificador fijo sustituye ese valor por uno elegido por el operador. Sigue ocupando 32 bits y se parte en major y minor con la misma regla. El bit 0 de `flags` vale 1 cuando el identificador es temporal y 0 cuando es fijo.
 
-El identificador es predecible. Esta etapa no usa TOTP ni cifrado.
+El identificador de este modo es predecible. No usa TOTP ni cifrado. El modo kiosco de la simulación, que sí deriva el `uint32` de un secreto, está en la sección C y no reemplaza a este.
 
 Los vectores de `fixtures/windows.json` son normativos. El caso de referencia es:
 
@@ -96,6 +96,55 @@ Android filtra con `ScanFilter.setServiceData(serviceUuid, null)`. iOS no puede 
 
 El anuncio propio no es conectable ni escaneable, salvo el interruptor de la variante conectable.
 
+## C. Simulación QR + BLE
+
+Modo aparte del identificador por índice de ventana. El modo de la sección anterior queda para repetir las pruebas ya hechas. Este modo es el kiosco de laboratorio: secreto mock, QR y BLE distintos, sin API. La codificación de abajo es la del ensayo. No es el contrato con el servidor.
+
+Constantes, en UTF-8, iguales en Android y en iOS:
+
+```text
+secreto    = lab-secreto-mock
+kiosco_id  = lab-kiosco-01
+etiqueta   = asis-ble-v1
+```
+
+`kiosco_id` no contiene `|`. El período es 15 segundos. `T = floor(unix_s / 15)`.
+
+El contador que entra en cada HMAC es `T` como entero de 8 bytes, big-endian. No es el texto decimal de `T` y no es el período de 30 segundos que una librería TOTP trae por defecto.
+
+```text
+QR:   TOTP RFC 6238, HMAC-SHA1, 6 dígitos, período 15, clave = secreto
+      token = esos 6 dígitos, con ceros a la izquierda
+      texto = v2|{kiosco_id}|{token}|{T}
+
+BLE:  K_ble = HMAC-SHA256(secreto, etiqueta)
+      valor = primeros 4 bytes de HMAC-SHA256(K_ble, contador), uint32 big-endian
+```
+
+Ese `valor` ocupa el campo `identifier` del service data de 9 bytes de la sección B. Versión `0x01`, flags con el bit 0 en 1, período 15 y la potencia medida siguen en el mismo lugar. El anuncio se reinicia en cada borde de ventana, junto con el QR, a partir del mismo `T`.
+
+Un par es válido cuando se cumplen las cuatro condiciones:
+
+1. El texto del QR parte en cuatro campos `v2`, `kiosco_id`, `token` y `step`, y el `kiosco_id` es el de laboratorio.
+2. `token` es el TOTP del secreto para ese `step`.
+3. El `identifier` BLE es el `valor` de `step`, de `step − 1` o de `step + 1`.
+4. `step` está a lo sumo a una ventana del `T` que el teléfono calcula con su reloj UTC.
+
+La espera de 15 segundos empieza cuando la persona inicia la fichada. En ese momento se abren la cámara y el escaneo BLE. Termina al primer par válido o al cumplirse el techo. El modo no pide entrada o salida, legajo ni firma, y no guarda una cola para un servidor. Si el par cierra, la pantalla dice `Ingreso correcto` y muestra el texto del QR, el identificador BLE y la ventana. Si vence el techo, dice `No se pudo marcar. Intentá de nuevo.` Al segundo fallo dice `Si sigue sin poder, pedile al encargado una fichada asistida. Podés intentar otra vez.` y deja el reintento disponible. Ese aviso no abre otro flujo.
+
+Con el par leído el receptor arma un payload de ensayo y se lo entrega a un mock en el mismo proceso. El mock vuelve a comprobar el par con el secreto de laboratorio. No abre una conexión y no es el cuerpo de la API.
+
+```text
+kind           = lab-checkin
+kioskId, token, step, bleIdentifier, qrText
+```
+
+El secreto no entra en el payload. Tampoco el legajo, la firma, la entrada o la salida, ni el GPS.
+
+En el registro, `qr_shown` anota cada ventana del kiosco: `code` es el identificador BLE y `error_message` es el texto del QR. `checkin` anota la fichada: `success` es el resultado del mock, `code` es el identificador BLE y `error_message` es el texto del QR o el motivo. Esos dos tipos no suman `emitterErrors` ni `receiverErrors`. El campo `protocol` sigue siendo `custom`. El modo kiosco de la pantalla no cambia el esquema.
+
+El vector normativo está en `fixtures/simulation.json`. El instante es el mismo del caso `exact-boundary` de `windows.json`.
+
 ## Relojes
 
 - El identificador se calcula con el reloj de pared UTC del dispositivo que lo calcula.
@@ -138,7 +187,9 @@ capture_latency_ms, success, error_code, error_message
 
 `protocol` es `ibeacon` o `custom`. `advertise_method` es `restart`, `update_set` o vacío en el receptor. `role` es `emitter` o `receiver`.
 
-Los tipos de evento usados por las apps son: `session_start`, `session_stop`, `advertise_started`, `advertise_start_failed`, `advertise_data_set`, `advertise_data_failed`, `advertise_stopped`, `rotation_scheduled`, `rotation_applied`, `bluetooth_off`, `bluetooth_on`, `permission_missing`, `permission_revoked`, `recovery`, `scan_started`, `scan_stopped`, `scan_failed`, `observation`, `capture_attempt`, `unsupported_version`, `error`.
+Los tipos de evento usados por las apps son: `session_start`, `session_stop`, `advertise_started`, `advertise_start_failed`, `advertise_data_set`, `advertise_data_failed`, `advertise_stopped`, `rotation_scheduled`, `rotation_applied`, `bluetooth_off`, `bluetooth_on`, `permission_missing`, `permission_revoked`, `recovery`, `scan_started`, `scan_stopped`, `scan_failed`, `observation`, `capture_attempt`, `unsupported_version`, `error`, `qr_shown`, `checkin`.
+
+`qr_shown` y `checkin` usan las columnas que ya existen. El texto del QR va en `error_message` y el identificador BLE en `code`. No son errores de radio: el resumen no los cuenta en `emitterErrors` ni en `receiverErrors`. El detalle está en la sección C.
 
 Una versión de paquete distinta de 1 produce `unsupported_version` y no una observación con código inventado. Cada versión desconocida se anota una sola vez por sesión.
 
