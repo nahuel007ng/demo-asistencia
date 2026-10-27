@@ -1,6 +1,6 @@
 # Plan de pruebas de campo
 
-Cada fila de `templates/comparacion.csv` es una combinación de dispositivo receptor, protocolo, método de emisión, período e intervalo. La meta del 99 % de capturas correctas en 5 segundos es una hipótesis. El porcentaje que vale es el de la exportación.
+Cada fila de `templates/comparacion.csv` es una combinación de dispositivo receptor, protocolo, método de emisión, período e intervalo. La meta del 99 % de capturas correctas en 5 segundos es una hipótesis sobre los intentos de esta planilla: cada intento espera como máximo 5 segundos y la serie trae 20. El porcentaje que vale para esa fila es el de la exportación. No es el porcentaje de fichadas ni de teléfonos. Esa otra escala está en [`ESTADO.md`](ESTADO.md).
 
 Hacen falta dos equipos como mínimo: un Android que emite y otro que recibe (Android o iPhone). El iPhone no emite.
 
