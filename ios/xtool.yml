@@ -1,0 +1,6 @@
+version: 1
+bundleID: dev.municipal.blelab
+product: MunicipalBleLab
+infoPath: XtoolInfo.plist
+resources:
+  - MunicipalBleLab/PrivacyInfo.xcprivacy
