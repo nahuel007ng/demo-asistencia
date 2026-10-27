@@ -24,6 +24,9 @@ xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
 DerivedData/
+.build/
+ios/.bsp/
+ios/xtool/
 *.hmap
 *.ipa
 *.dSYM
