@@ -231,8 +231,16 @@ final class LabCoreTests: XCTestCase {
         XCTAssertEqual("DATA_TOO_LARGE", events.first?["error_code"] as? String)
         let summary = json["summary"] as? [String: Any] ?? [:]
         XCTAssertEqual(1, (summary["emitterErrors"] as? NSNumber)?.intValue)
-        XCTAssertEqual(1, (summary["receiverErrors"] as? NSNumber)?.intValue)
+        XCTAssertEqual(0, (summary["receiverErrors"] as? NSNumber)?.intValue)
         XCTAssertTrue((json["clockNote"] as? String)?.contains("no están sincronizados") == true)
+
+        let receiverError = baseEvent(EventTypes.scanFailed, role: "receiver")
+        stats.absorb(receiverError)
+        let bothText = SessionExport.json(events: [event, receiverError], summary: stats.summary())
+        let both = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(bothText.utf8)) as? [String: Any])
+        let bothSummary = try XCTUnwrap(both["summary"] as? [String: Any])
+        XCTAssertEqual(1, (bothSummary["emitterErrors"] as? NSNumber)?.intValue)
+        XCTAssertEqual(1, (bothSummary["receiverErrors"] as? NSNumber)?.intValue)
     }
 
     func testSimulationFixtureMatchesTheSharedVector() throws {
