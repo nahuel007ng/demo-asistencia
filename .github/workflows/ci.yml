@@ -64,11 +64,17 @@ jobs:
           xcodebuild -version
           plutil -lint ios/MunicipalBleLab/Info.plist ios/MunicipalBleLab/PrivacyInfo.xcprivacy
           swift package --package-path ios dump-package > /dev/null
+      - name: Prepare iOS simulator
+        run: |
+          xcodebuild -downloadPlatform iOS -buildVersion 18.5
+          simulator_id=$(xcrun simctl create 'BLE Lab CI' com.apple.CoreSimulator.SimDeviceType.iPhone-16 com.apple.CoreSimulator.SimRuntime.iOS-18-5)
+          echo "IOS_SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
+          xcrun simctl bootstatus "$simulator_id" -b
       - name: XCTest with shared protocol fixtures
         run: |
           xcodebuild test \
             -project ios/MunicipalBleLab.xcodeproj -scheme MunicipalBleLab \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
+            -destination "platform=iOS Simulator,id=$IOS_SIMULATOR_ID" \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             -resultBundlePath "$RUNNER_TEMP/Tests.xcresult" \
             CODE_SIGNING_ALLOWED=NO

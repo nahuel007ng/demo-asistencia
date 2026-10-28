@@ -59,6 +59,8 @@ explícito que pasa por PR. La imagen del runner recibe actualizaciones del prov
 `iOS` usa macOS 15, Xcode 16.4 y el scheme compartido `MunicipalBleLab`:
 valida los plist y el manifiesto SwiftPM, ejecuta XCTest en iPhone 16 / iOS 18.5
 con los mismos fixtures del repositorio y corre `xcodebuild analyze`.
+CI asegura la instalación del runtime iOS 18.5 y crea y arranca su propio
+simulador; no depende de que la imagen traiga dispositivos precreados.
 No hay paquetes Swift externos que resolver. La compilación de la app para
 simulador forma parte de `xcodebuild test`; no requiere firma ni credenciales.
 El empaquetado xtool, la firma y la instalación física siguen siendo manuales,
