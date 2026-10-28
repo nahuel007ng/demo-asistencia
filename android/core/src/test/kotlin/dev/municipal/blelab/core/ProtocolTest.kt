@@ -128,6 +128,9 @@ class ProtocolTest {
     fun permissionsDoNotUseNeverForLocationAndFollowTheSdk() {
         assertEquals(listOf(LabPermissions.FINE_LOCATION), LabPermissions.forReceiver(24))
         assertTrue(LabPermissions.SCAN in LabPermissions.forReceiver(31))
+        assertTrue(LabPermissions.COARSE_LOCATION in LabPermissions.forReceiver(31))
+        assertTrue(LabPermissions.COARSE_LOCATION in LabPermissions.forCheckIn(36))
+        assertFalse(LabPermissions.COARSE_LOCATION in LabPermissions.forEmitter(36))
         assertTrue(LabPermissions.FINE_LOCATION in LabPermissions.forReceiver(36))
         assertFalse(LabPermissions.FINE_LOCATION in LabPermissions.forEmitter(36))
         assertTrue(LabPermissions.ADVERTISE in LabPermissions.forEmitter(31))

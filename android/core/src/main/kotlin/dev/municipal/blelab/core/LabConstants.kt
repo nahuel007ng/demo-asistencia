@@ -48,6 +48,7 @@ object EventTypes {
 
 object LabPermissions {
     const val FINE_LOCATION = "android.permission.ACCESS_FINE_LOCATION"
+    const val COARSE_LOCATION = "android.permission.ACCESS_COARSE_LOCATION"
     const val SCAN = "android.permission.BLUETOOTH_SCAN"
     const val ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
     const val CONNECT = "android.permission.BLUETOOTH_CONNECT"
@@ -62,6 +63,7 @@ object LabPermissions {
             add(CONNECT)
         }
         add(FINE_LOCATION)
+        if (sdkInt >= 31) add(COARSE_LOCATION)
         if (sdkInt >= 33) add(NOTIFICATIONS)
     }
 

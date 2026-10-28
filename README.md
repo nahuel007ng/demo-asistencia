@@ -34,6 +34,8 @@ Identificador de aplicación, en las dos plataformas: `dev.municipal.blelab`. Ve
 
 ## Tecnologías
 
+El flujo de ramas, PR, CI y merge manual está en [CONTRIBUTING.md](CONTRIBUTING.md).
+
 | Pieza | Versión en este repositorio |
 | --- | --- |
 | Kotlin | 2.1.20 |
@@ -80,7 +82,7 @@ Ese scheme de Xcode no se corrió en un Mac durante esta entrega. Los tests XCTe
 Android no usa `neverForLocation`. El escaneo puede servir para acreditar presencia y no se filtran balizas de la API.
 
 - Hasta API 30, el receptor pide ubicación precisa en ejecución. Bluetooth y Bluetooth Admin son de instalación, limitados a ese API. Si el servicio de ubicación del sistema está apagado, el escaneo no arranca.
-- Desde API 31, el receptor pide dispositivos cercanos (`BLUETOOTH_SCAN` y `BLUETOOTH_CONNECT`) y además ubicación precisa. El emisor pide `BLUETOOTH_ADVERTISE` y `BLUETOOTH_CONNECT`, sin ubicación.
+- Desde API 31, el receptor pide dispositivos cercanos (`BLUETOOTH_SCAN` y `BLUETOOTH_CONNECT`) y ubicación precisa junto con aproximada, como exige Android para solicitar precisión. Para escanear sigue requiriendo la precisa. El emisor pide `BLUETOOTH_ADVERTISE` y `BLUETOOTH_CONNECT`, sin ubicación.
 - Desde API 33 se pide el permiso de notificaciones para el servicio en primer plano.
 - La emisión y la recepción largas corren en un servicio `connectedDevice` con la pantalla encendida. Si el sistema lo corta, el evento queda registrado: es un dato del experimento, no un fallo a esconder.
 
