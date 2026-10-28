@@ -66,6 +66,8 @@ jobs:
           swift package --package-path ios dump-package > /dev/null
       - name: Prepare iOS simulator
         run: |
+          xcodebuild -runFirstLaunch
+          xcrun simctl list
           xcodebuild -downloadPlatform iOS -buildVersion 18.5
           simulator_id=$(xcrun simctl create 'BLE Lab CI' com.apple.CoreSimulator.SimDeviceType.iPhone-16 com.apple.CoreSimulator.SimRuntime.iOS-18-5)
           echo "IOS_SIMULATOR_ID=$simulator_id" >> "$GITHUB_ENV"
