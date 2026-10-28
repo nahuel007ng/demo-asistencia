@@ -283,7 +283,7 @@ class LabController(
     private fun startEmitterRadio() {
         val config = uiState.value.emitter
         val built = buildAdvertisement(config, System.currentTimeMillis() / 1000)
-        val engine: LabAdvertiser = if (config.method == "update_set") {
+        val engine: LabAdvertiser = if (config.method == "update_set" && Build.VERSION.SDK_INT >= 26) {
             UpdateSetAdvertiser(context, handler)
         } else {
             RestartAdvertiser(context, handler)
